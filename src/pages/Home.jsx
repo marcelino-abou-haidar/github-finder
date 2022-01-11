@@ -1,8 +1,10 @@
 import UserResults from './../components/users/UserResults'
+import UserSearch from './../components/users/UserSearch'
+
 const Home = () => {
 	return (
 		<div>
-			{/* Something to do here */}
+			<UserSearch />
 			<UserResults />
 		</div>
 	)
