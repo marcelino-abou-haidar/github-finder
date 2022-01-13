@@ -1,4 +1,5 @@
 import { createContext, useReducer } from 'react'
+import { createRoutesFromChildren } from 'react-router-dom'
 import githubReducer from './githubReducer'
 
 const GithubContext = createContext()
@@ -10,6 +11,7 @@ export const GithubProvider = ({ children }) => {
 	const initialeState = {
 		users: [],
 		user: {},
+		respos: [],
 		loading: false,
 	}
 
@@ -39,14 +41,11 @@ export const GithubProvider = ({ children }) => {
 			q: text,
 		})
 
-		const response = await fetch(
-			`${process.env.REACT_APP_GITHUB_URL}/search/users?${params}`,
-			{
-				headers: {
-					Authorization: `token ${process.env.REACT_APP_GITHUB_TOKEN}`,
-				},
-			}
-		)
+		const response = await fetch(`${process.env.REACT_APP_GITHUB_URL}/search/users?${params}`, {
+			headers: {
+				Authorization: `token ${process.env.REACT_APP_GITHUB_TOKEN}`,
+			},
+		})
 		const { items } = await response.json()
 
 		dispatch({
@@ -59,14 +58,11 @@ export const GithubProvider = ({ children }) => {
 	const getUser = async (login) => {
 		setLoading()
 
-		const response = await fetch(
-			`${process.env.REACT_APP_GITHUB_URL}/users/${login}`,
-			{
-				headers: {
-					Authorization: `token ${process.env.REACT_APP_GITHUB_TOKEN}`,
-				},
-			}
-		)
+		const response = await fetch(`${process.env.REACT_APP_GITHUB_URL}/users/${login}`, {
+			headers: {
+				Authorization: `token ${process.env.REACT_APP_GITHUB_TOKEN}`,
+			},
+		})
 		if (response.status === 404) {
 			window.location = '/notfound'
 		} else {
@@ -77,6 +73,30 @@ export const GithubProvider = ({ children }) => {
 				payload: data,
 			})
 		}
+	}
+
+	// Get user erpos
+
+	const getUserRepos = async (login) => {
+		setLoading()
+		const params = new URLSearchParams({
+			sort: 'created',
+			per_page: 10,
+		})
+		const response = await fetch(
+			`${process.env.REACT_APP_GITHUB_URL}/users/${login}/repos?${params}`,
+			{
+				headers: {
+					Authorization: `token ${process.env.REACT_APP_GITHUB_TOKEN}`,
+				},
+			}
+		)
+		const data = await response.json()
+
+		dispatch({
+			type: 'GET_REPOS',
+			payload: data,
+		})
 	}
 
 	const clearUsers = () => {
@@ -92,10 +112,12 @@ export const GithubProvider = ({ children }) => {
 			value={{
 				users: state.users,
 				user: state.user,
+				repos: state.repos,
 				loading: state.loading,
 				searchUsers,
 				clearUsers,
 				getUser,
+				getUserRepos,
 			}}
 		>
 			{children}
