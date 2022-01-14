@@ -1,7 +1,9 @@
 import { PropTypes } from 'prop-types'
+import Spinner from '../../layout/Spinner'
 import RepoItem from './RepoItem'
 
 const RepoList = ({ repos }) => {
+	if (!repos) return <Spinner />
 	return (
 		<div className="rounded-lg shadow-lg card bg-base-100">
 			<div className="card-body">
